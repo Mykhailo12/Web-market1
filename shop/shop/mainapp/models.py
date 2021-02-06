@@ -2,10 +2,18 @@ from django.db import models #Base models
 from django.contrib.auth import get_user_model #Lib for create User model
 from django.contrib.contenttypes.models import ContentType #Lib for save info from mdoels
 from django.contrib.contenttypes.fields import GenericForeignKey #Add special Foreign Key
+from PIL import Image
 
 User = get_user_model() #Create user model
 
+class MinResolutionErrorException(Exception):
+    pass
+
+class MaxResolutionErrorException(Exception):
+    pass
+
 class LastestProductsManager:
+    pass
 
     @staticmethod
     def get_products_for_main_page(*args, **kwargs):
@@ -37,6 +45,11 @@ class Category(models.Model):
 
 #Product class (first)
 class Product(models.Model):
+
+    MIN_RESOLUTION = (400, 400)
+    MAX_RESOLUTION = (800, 700)
+    MAX_IMAGE_SIZE = 3145728
+
     class Meta:
         abstract = True
 
@@ -49,6 +62,21 @@ class Product(models.Model):
 
     def __str__(self):
         return self.title
+
+    MIN_RESOLUTION = (400, 400)
+    MAX_RESOLUTION = (800, 700)
+
+    def save(self, *args, **kwargs):
+        image = self.image
+        img = Image.open(image)
+        min_height, min_width = self.MIN_RESOLUTION
+        max_height, min_width = self .MAX_RESOLUTION
+        if img.height < min_height or img.width < min_width:
+            raise MinResolutionErrorException('Разришение изображения меньше минииального!')
+        if img.height > max_height or img.width > max_width:
+            raise MaxResolutionErrorException('Разришение изображения больше максимального!')
+        return image
+
 
 class Notebook(Product):
     diagonal = models.CharField(max_length=255, verbose_name='Диагональ')
